@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState,useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Html, Line } from "@react-three/drei";
 import { TOPICS } from "./data";
@@ -12,6 +12,7 @@ const COLORS = {
   light: "#B8ACE8",
   soft: "#F3F0FA",
   panel: "#201A32",
+  locked: "#4a4566",
 };
 
 // Calcul dynamique des positions
@@ -26,17 +27,15 @@ export const getPositions = (radius = 5.2) => {
 // Position desktop par défaut (compatibilité)
 export const positions = getPositions(5.2);
 
-function Table({ t, p, i, active, onPick, showLabel }) {
+function Table({ t, p, i, active, onPick, showLabel, locked, done }) {
   const g = useRef();
   const [hover, setHover] = useState(false);
+  const base = locked ? COLORS.locked : t.color || COLORS.primary;
 
   useFrame(({ clock }) => {
     if (!g.current) return;
-
     const s = active ? 1.3 : hover ? 1.15 : 1;
-
     g.current.scale.lerp({ x: s, y: s, z: s }, 0.12);
-
     g.current.position.y = Math.sin(clock.elapsedTime + i) * 0.12;
   });
 
@@ -59,45 +58,39 @@ function Table({ t, p, i, active, onPick, showLabel }) {
           document.body.style.cursor = "auto";
         }}
       >
-        {/* Table supérieure */}
         <mesh position={[0, 0.55, 0]}>
           <boxGeometry args={[2.2, 0.38, 1]} />
           <meshStandardMaterial
-            color={t.color || COLORS.primary}
-            emissive={t.color || COLORS.primary}
+            color={base}
+            emissive={base}
             emissiveIntensity={glow}
           />
         </mesh>
 
-        {/* Couches de la table */}
         {[0, 1, 2].map((k) => (
           <mesh key={k} position={[0, 0.2 - k * 0.3, 0]}>
             <boxGeometry args={[2.2, 0.26, 1]} />
             <meshStandardMaterial
               color={k % 2 ? COLORS.dark : COLORS.panel}
-              emissive={t.color || COLORS.primary}
+              emissive={base}
               emissiveIntensity={glow * 0.08}
             />
           </mesh>
         ))}
 
-        {/* Détails lumineux */}
         <mesh position={[-0.75, 0.2, 0.51]}>
           <boxGeometry args={[0.5, 0.06, 0.01]} />
-          <meshBasicMaterial color={t.color || COLORS.primary} />
+          <meshBasicMaterial color={base} />
         </mesh>
-
         <mesh position={[0.1, -0.1, 0.51]}>
           <boxGeometry args={[1.2, 0.06, 0.01]} />
           <meshBasicMaterial color={COLORS.accent} />
         </mesh>
-
         <mesh position={[-0.2, -0.4, 0.51]}>
           <boxGeometry args={[1.7, 0.06, 0.01]} />
           <meshBasicMaterial color={COLORS.accent} />
         </mesh>
 
-        {/* Nom de la notion */}
         {showLabel && (
           <Html
             center
@@ -105,7 +98,8 @@ function Table({ t, p, i, active, onPick, showLabel }) {
             position={[0, -1.05, 0]}
             style={{ pointerEvents: "none" }}
           >
-            <span className="node-label" style={{ borderColor: t.color }}>
+            <span className="node-label" style={{ borderColor: base }}>
+              {locked ? "🔒 " : done ? "✓ " : ""}
               {t.title}
             </span>
           </Html>
@@ -132,6 +126,21 @@ function Packet({ to, offset, color }) {
       <meshBasicMaterial color={color || COLORS.accent} />
     </mesh>
   );
+}
+
+// Déplace la caméra vers la table active (navigation après un défi réussi)
+function Rig({ id }) {
+  const controls = useThree((s) => s.controls);
+  useFrame(() => {
+    if (!controls) return;
+    const i = TOPICS.findIndex((t) => t.id === id);
+    const tx = i >= 0 ? positions[i][0] * 0.6 : 0,
+      tz = i >= 0 ? positions[i][2] * 0.6 : 0;
+    controls.target.x += (tx - controls.target.x) * 0.05;
+    controls.target.z += (tz - controls.target.z) * 0.05;
+    controls.update();
+  });
+  return null;
 }
 
 function Core() {
@@ -171,7 +180,7 @@ function Core() {
   );
 }
 
-export default function Scene({ id, setId }) {
+export default function Scene({ id, setId, unlocked, solved }) {
   const { size } = useThree();
 
   // Responsive breakpoints
@@ -199,7 +208,7 @@ export default function Scene({ id, setId }) {
         args={[50, 50, COLORS.accent, COLORS.dark]}
         position={[0, -1.7, 0]}
       />
-
+      <Rig id={id} positions={responsivePositions} />
       <Core />
 
       {TOPICS.map((t, i) => {
@@ -222,8 +231,16 @@ export default function Scene({ id, setId }) {
             <Packet to={p} offset={i * 0.13} color={color} />
 
             <Packet to={p} offset={i * 0.13 + 0.5} color={color} />
-            <Table t={t}  p={p}  i={i}  active={id === t.id}  onPick={setId}  showLabel={!id}
-          />
+            <Table
+              t={t}
+              p={p}
+              i={i}
+              active={id === t.id}
+              onPick={setId}
+              showLabel={!id}
+              locked={!unlocked.includes(t.id)}
+              done={solved.includes(t.id)}
+            />
           </group>
         );
       })}
