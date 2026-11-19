@@ -1,0 +1,61 @@
+
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+dist/
+dist-ssr/
+build/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Cache
+.cache/
+.vite/
+.eslintcache/
+.parcel-cache/
+
+# Testing
+coverage/
+
+# IDEs and editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Local deployment files
+.vercel/
+.netlify/
+
+# Optional package manager files
+# Uncomment if you do not want to track these
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
