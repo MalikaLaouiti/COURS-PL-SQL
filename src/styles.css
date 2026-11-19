@@ -318,6 +318,16 @@ pre{
   height: 100%;
   touch-action: pan-y;
 }
+.challenge{line-height:1.9;white-space:pre-wrap}
+.challenge input{font:inherit;background:#0f1d3d;color:#ffd166;border:0;border-bottom:2px dashed #ffd166;padding:0 4px;outline:none;text-align:center}
+.challenge input.good{border-color:#06d6a0;color:#06d6a0}.challenge input.bad{border-color:#ef476f;color:#ef476f}
+.row{display:flex;gap:8px;margin:12px 0}
+.run,.hintbtn{padding:9px 16px;border-radius:10px;border:0;font:inherit;font-weight:600;cursor:pointer}
+.run{background:#06d6a0;color:#04120d}.hintbtn{background:#ffffff14;color:#fff}
+.err{color:#ef476f}.out{color:#e6ecff;border:1px solid #06d6a0}
+.toast{position:absolute;z-index:7;top:20px;left:50%;transform:translateX(-50%);background:#e63946;padding:10px 18px;border-radius:999px;font-weight:600}
+.unlock{position:absolute;z-index:5;left:20px;bottom:18px;padding:8px 14px;border-radius:999px;border:1px solid #ffffff33;background:#0a1224;color:#fff;font:inherit;cursor:pointer}
+
 
 @media (max-width: 600px) {
   .top {
