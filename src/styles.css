@@ -329,6 +329,11 @@ pre{
 .unlock{position:absolute;z-index:5;left:20px;bottom:18px;padding:8px 14px;border-radius:999px;border:1px solid #ffffff33;background:#0a1224;color:#fff;font:inherit;cursor:pointer}
 
 
+.sum{opacity:.85;margin:0 0 4px}
+.sec h3{margin:16px 0 6px;color:var(--c);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+.sec ul{margin:0;padding-left:18px;line-height:1.6}
+.sec li{margin-bottom:4px}
+
 @media (max-width: 600px) {
   .top {
     padding: 16px;
