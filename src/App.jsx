@@ -106,7 +106,16 @@ function Panel({ t, onClose, onSolve, solved }) {
   const score = Object.entries(ans).filter(
     ([k, v]) => t.quiz[k][2] === v,
   ).length;
+  const answered = Object.keys(ans).length === t.quiz.length;
+  const passed = answered && score === t.quiz.length;
 
+  // Enregistre la réponse et débloque la suite si le quiz est 100 % juste
+  const answer = (qi, oi) => {
+    const next = { ...ans, [qi]: oi };
+    setAns(next);
+    const all = Object.keys(next).length === t.quiz.length;
+    if (all && t.quiz.every(([, , good], k) => next[k] === good)) onSolve(t.id);
+  };
   return (
     <aside className="panel" style={{ "--c": t.color }}>
       <button className="close" onClick={onClose} aria-label="Fermer">
@@ -160,7 +169,7 @@ function Panel({ t, onClose, onSolve, solved }) {
                     key={oi}
                     className={"opt " + cls}
                     disabled={done}
-                    onClick={() => setAns({ ...ans, [qi]: oi })}
+                    onClick={() => answer(qi, oi)}
                   >
                     {o}
                   </button>
@@ -174,10 +183,15 @@ function Panel({ t, onClose, onSolve, solved }) {
               )}
             </div>
           ))}
-          {Object.keys(ans).length === t.quiz.length && (
-            <p className="score">
-              Score : {score}/{t.quiz.length}
-            </p>
+          {answered && (
+            <>
+              <p className="score">Score : {score}/{t.quiz.length}</p>
+              {passed ? (
+                <p className="score">Quiz réussi ! La table suivante est déverrouillée.</p>
+              ) : (
+                <button className="run" onClick={() => setAns({})}>↻ Réessayer</button>
+              )}
+            </>
           )}
         </>
       )}
@@ -259,7 +273,7 @@ export default function App() {
   const pick = (k) => {
     if (unlocked.includes(k)) return setId(k)
     const prev = TOPICS[TOPICS.findIndex(t => t.id === k) - 1]
-    setToast(`🔒 Résous d'abord le défi « ${prev.title} »`); setTimeout(() => setToast(''), 2500)
+    setToast(`🔒 Réussis le défi ou le quiz « ${prev.title} » d'abord`); setTimeout(() => setToast(''), 2500)
   }
   const onSolve = (k) => {
     if (solved.includes(k)) return
@@ -273,10 +287,10 @@ export default function App() {
     <>
       <header className="top">
         <h1>SELECT * FROM plsql;</h1>
-        <p>
-          Clique sur une table pour ouvrir la notion. Glisse pour tourner,
-          molette pour zoomer.
-        </p>
+        <h4>
+          SQL est un langage déclarative / non procédural.</h4>
+        <h4>Besoin d’un langage procédural qui inclus SQL à l’intérieur en ajoutant des variables et des boucles.</h4>
+        
         <p>Progression : {solved.length}/{TOPICS.length} défis</p>
       </header>
 
