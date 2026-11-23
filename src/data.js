@@ -180,8 +180,8 @@ END;
   summary:`Un bloc qui s'exécute automatiquement lors d'un INSERT, UPDATE ou DELETE.`,
   details:[
     { h:'Définition', l:[`Bloc nommé déclenché automatiquement par un événement sur une table : INSERT, UPDATE ou DELETE.`,`Moment : BEFORE (avant) ou AFTER (après) l'événement.`] },
-    { h:'Niveau', l:[`FOR EACH ROW : une exécution par ligne concernée (niveau ligne).`,`Sans cette clause : une seule exécution par instruction.`] },
-    { h:':NEW et :OLD (niveau ligne)', l:[`:NEW = nouvelle valeur, :OLD = ancienne valeur.`,`À l'INSERT, :OLD est NULL. Au DELETE, :NEW est NULL.`,`On peut modifier :NEW seulement dans un trigger BEFORE.`] },
+    { h:'Mode d\'exécution', l:[`FOR EACH ROW : une exécution par ligne concernée (trigger ligne).`,`Sans cette clause : une seule exécution par instruction (trigger instruction).`] },
+    { h:':NEW et :OLD (trigger ligne)', l:[`:NEW = nouvelles valeurs des colonnes ; :OLD = anciennes valeurs.`,`À l'INSERT, :OLD est NULL. Au DELETE, :NEW est NULL.`,`On peut modifier :NEW seulement dans un trigger BEFORE.`] },
     { h:'Piège à éviter', l:[`COMMIT et ROLLBACK sont interdits dans un trigger.`,`Interroger la table du trigger provoque l'erreur « mutating table » (ORA-04091).`] }
   ],
   faq:[
