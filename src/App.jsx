@@ -250,6 +250,9 @@ function Chat() {
 
   return (
     <section className="chat" id="chat">
+      <a className="back" href="#top" title="Retour au cours">
+        ↑ Retour au cours
+      </a>
       <h2>Une question sur le cours ?</h2>
       <div className="log">
         {msgs.map((m, i) => (
@@ -273,9 +276,26 @@ function Chat() {
 
 export default function App() {
   const [id, setId] = useState(null);
-  const [unlocked, setUnlocked] = useState([TOPICS[0].id]);
-  const [solved, setSolved] = useState([]);
+  const saved = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("plsql-progress")) || {};
+    } catch {
+      return {};
+    }
+  }, []);
+  const [unlocked, setUnlocked] = useState(saved.unlocked || [TOPICS[0].id]);
+  const [solved, setSolved] = useState(saved.solved || []);
+  useEffect(() => {
+    localStorage.setItem("plsql-progress", JSON.stringify({ unlocked, solved }));
+  }, [unlocked, solved]);
+  const reset = () => {
+    if (!confirm("Réinitialiser la progression ?")) return;
+    setUnlocked([TOPICS[0].id]);
+    setSolved([]);
+    setId(null);
+  };
   const [toast, setToast] = useState("");
+  const [party, setParty] = useState(false);
   const pick = (k) => {
     if (unlocked.includes(k)) return setId(k);
     const prev = TOPICS[TOPICS.findIndex((t) => t.id === k) - 1];
@@ -289,14 +309,24 @@ export default function App() {
     if (next) {
       setUnlocked((u) => [...new Set([...u, next.id])]);
       setTimeout(() => setId(next.id), 1800);
+    } else {
+      setParty(true);
+      setTimeout(() => {
+        setParty(false);
+        setId(null);
+        document.getElementById("chat")?.scrollIntoView({ behavior: "smooth" });
+      }, 3500);
     }
   };
   const topic = useMemo(() => TOPICS.find((t) => t.id === id), [id]);
 
   return (
     <>
-      <header className="top">
+      <header className="top" id="top">
         <h1>SELECT * FROM plsql;</h1>
+        <button className="reset" onClick={reset}>
+            ↺ Réinitialiser
+          </button>
         <h4>SQL est un langage déclarative / non procédural.</h4>
         <h4>
           Besoin d’un langage procédural qui inclus SQL à l’intérieur en
@@ -304,7 +334,10 @@ export default function App() {
         </h4>
 
         <p>
-          Progression : {solved.length}/{TOPICS.length} défis
+          Progression : {solved.length}/{TOPICS.length} défis{" "}
+          <button className="reset" onClick={reset}>
+            ↺ Réinitialiser
+          </button>
         </p>
       </header>
 
@@ -345,6 +378,21 @@ export default function App() {
           />
         )}
         {toast && <div className="toast">{toast}</div>}
+        {party && (
+          <div className="party">
+            <b>🎉 Bravo ! Tu as terminé le cours PL/SQL !</b>
+            {Array.from({ length: 60 }, (_, i) => (
+              <i
+                key={i}
+                style={{
+                  left: `${(i * 37) % 100}%`,
+                  background: `hsl(${(i * 47) % 360} 90% 60%)`,
+                  animationDelay: `${(i % 10) * 0.15}s`,
+                }}
+              />
+            ))}
+          </div>
+        )}
         {/* <button className="unlock" onClick={() => setUnlocked(TOPICS.map(t => t.id))}>🔓 Tout déverrouiller</button> */}
         <a className="goto" href="#chat">
           Poser une question
